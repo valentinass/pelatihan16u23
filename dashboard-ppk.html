@@ -1,0 +1,1574 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Dashboard PPK – Identifikasi & Mitigasi Risiko</title>
+  <style>
+    :root {
+      --primary:   #1a3c5e;
+      --secondary: #2e7d9a;
+      --accent:    #f0a500;
+      --danger:    #c0392b;
+      --warning:   #e67e22;
+      --success:   #27ae60;
+      --info:      #2980b9;
+      --bg:        #f0f4f8;
+      --card:      #ffffff;
+      --border:    #d1dce8;
+      --text:      #2c3e50;
+      --muted:     #7f8c9a;
+      --radius:    10px;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Segoe UI', Arial, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+    }
+
+    /* ── HEADER ── */
+    header {
+      background: linear-gradient(135deg, var(--primary) 0%, #0f2744 100%);
+      color: #fff;
+      padding: 0 28px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 70px;
+      box-shadow: 0 3px 12px rgba(0,0,0,0.25);
+      position: sticky; top: 0; z-index: 100;
+    }
+    header .logo {
+      display: flex; align-items: center; gap: 12px;
+    }
+    header .logo .icon {
+      width: 42px; height: 42px;
+      background: var(--accent);
+      border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 22px;
+    }
+    header .logo h1 { font-size: 18px; font-weight: 700; line-height: 1.2; }
+    header .logo p  { font-size: 11px; opacity: .75; }
+    header .meta    { font-size: 12px; opacity: .8; text-align: right; }
+
+    /* ── TABS ── */
+    nav.tabs {
+      background: var(--primary);
+      display: flex; gap: 4px;
+      padding: 0 28px;
+      border-bottom: 3px solid var(--accent);
+    }
+    nav.tabs button {
+      background: none; border: none; cursor: pointer;
+      color: rgba(255,255,255,.65);
+      padding: 14px 20px;
+      font-size: 13px; font-weight: 600;
+      border-bottom: 3px solid transparent;
+      margin-bottom: -3px;
+      transition: all .2s;
+    }
+    nav.tabs button.active,
+    nav.tabs button:hover {
+      color: #fff;
+      border-bottom-color: var(--accent);
+    }
+    nav.tabs button .badge {
+      background: var(--accent);
+      color: #000;
+      border-radius: 10px;
+      padding: 1px 7px;
+      font-size: 10px;
+      margin-left: 6px;
+    }
+
+    /* ── MAIN ── */
+    main {
+      max-width: 1340px;
+      margin: 0 auto;
+      padding: 28px 20px;
+    }
+
+    /* ── SECTION ── */
+    .tab-section { display: none; }
+    .tab-section.active { display: block; }
+
+    /* ── KPI STRIP ── */
+    .kpi-row {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+      gap: 16px; margin-bottom: 28px;
+    }
+    .kpi {
+      background: var(--card);
+      border-radius: var(--radius);
+      padding: 18px 20px;
+      border-left: 5px solid var(--secondary);
+      box-shadow: 0 2px 8px rgba(0,0,0,.07);
+      display: flex; flex-direction: column; gap: 4px;
+    }
+    .kpi.red    { border-left-color: var(--danger); }
+    .kpi.orange { border-left-color: var(--warning); }
+    .kpi.green  { border-left-color: var(--success); }
+    .kpi.blue   { border-left-color: var(--info); }
+    .kpi .num   { font-size: 30px; font-weight: 800; }
+    .kpi .lbl   { font-size: 12px; color: var(--muted); }
+
+    /* ── CARD ── */
+    .card {
+      background: var(--card);
+      border-radius: var(--radius);
+      box-shadow: 0 2px 10px rgba(0,0,0,.07);
+      margin-bottom: 22px;
+      overflow: hidden;
+    }
+    .card-header {
+      background: linear-gradient(90deg, var(--primary), var(--secondary));
+      color: #fff;
+      padding: 14px 20px;
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .card-header h2 { font-size: 15px; }
+    .card-body { padding: 20px; }
+
+    /* ── GRID 2-COL ── */
+    .grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 22px;
+    }
+    @media(max-width:800px){ .grid-2 { grid-template-columns: 1fr; } }
+
+    /* ── FORM ── */
+    .form-group { margin-bottom: 16px; }
+    .form-group label {
+      display: block; font-size: 12px; font-weight: 700;
+      color: var(--primary); margin-bottom: 5px;
+    }
+    .form-group input,
+    .form-group select,
+    .form-group textarea {
+      width: 100%; padding: 9px 12px;
+      border: 1.5px solid var(--border);
+      border-radius: 7px; font-size: 13px;
+      outline: none; transition: border .2s;
+      background: #fafcff;
+    }
+    .form-group input:focus,
+    .form-group select:focus,
+    .form-group textarea:focus { border-color: var(--secondary); }
+    .form-group textarea { min-height: 80px; resize: vertical; }
+
+    /* ── BUTTONS ── */
+    .btn {
+      display: inline-flex; align-items: center; gap: 6px;
+      padding: 9px 18px; border-radius: 7px;
+      border: none; cursor: pointer;
+      font-size: 13px; font-weight: 700;
+      transition: filter .15s, transform .1s;
+    }
+    .btn:hover { filter: brightness(1.08); transform: translateY(-1px); }
+    .btn:active { transform: translateY(0); }
+    .btn-primary { background: var(--secondary); color: #fff; }
+    .btn-success { background: var(--success);   color: #fff; }
+    .btn-danger  { background: var(--danger);    color: #fff; }
+    .btn-warn    { background: var(--warning);   color: #fff; }
+    .btn-sm { padding: 5px 12px; font-size: 12px; }
+
+    /* ── TABLE ── */
+    .tbl-wrap { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    thead th {
+      background: var(--primary); color: #fff;
+      padding: 10px 12px; text-align: left;
+      font-size: 12px; white-space: nowrap;
+    }
+    tbody tr { border-bottom: 1px solid var(--border); }
+    tbody tr:hover { background: #f0f7ff; }
+    tbody td { padding: 10px 12px; vertical-align: middle; }
+
+    /* ── BADGES ── */
+    .badge {
+      display: inline-block;
+      padding: 3px 10px; border-radius: 12px;
+      font-size: 11px; font-weight: 700;
+    }
+    .badge-red    { background:#fde8e8; color:var(--danger); }
+    .badge-orange { background:#fef0e0; color:var(--warning); }
+    .badge-green  { background:#e2f5ea; color:var(--success); }
+    .badge-blue   { background:#deeeff; color:var(--info); }
+    .badge-gray   { background:#eceff1; color:#546e7a; }
+
+    /* ── RISK MATRIX ── */
+    .matrix-wrap { overflow-x: auto; }
+    .risk-matrix {
+      border-collapse: collapse;
+      width: 100%; min-width: 420px;
+    }
+    .risk-matrix td, .risk-matrix th {
+      border: 2px solid #fff;
+      width: 80px; height: 60px;
+      text-align: center; vertical-align: middle;
+      font-size: 12px; font-weight: 600;
+      cursor: default;
+    }
+    .risk-matrix .axis-label {
+      background: var(--primary); color: #fff;
+      font-size: 11px; font-weight: 700;
+    }
+    .cell-low      { background: #b7e1cd; color: #1e5c3a; }
+    .cell-med      { background: #fde68a; color: #7a4f00; }
+    .cell-high     { background: #fca5a5; color: #7f1d1d; }
+    .cell-critical { background: #ef4444; color: #fff; }
+    .cell-empty    { background: #eceff1; }
+
+    /* ── RISK INDICATOR ── */
+    .risk-pill {
+      display: inline-block;
+      padding: 4px 14px; border-radius: 20px;
+      font-size: 12px; font-weight: 700;
+    }
+    .risk-critical { background: #ef4444; color:#fff; }
+    .risk-high     { background: #f97316; color:#fff; }
+    .risk-medium   { background: #eab308; color:#1a1a00; }
+    .risk-low      { background: #22c55e; color:#fff; }
+
+    /* ── TIMELINE ── */
+    .timeline { position: relative; padding-left: 30px; }
+    .timeline::before {
+      content:''; position:absolute; left:10px; top:0; bottom:0;
+      width:2px; background: var(--border);
+    }
+    .tl-item {
+      position: relative; margin-bottom: 20px;
+    }
+    .tl-dot {
+      position:absolute; left:-24px; top:4px;
+      width:14px; height:14px; border-radius:50%;
+      border:3px solid #fff; box-shadow:0 0 0 2px var(--secondary);
+      background: var(--secondary);
+    }
+    .tl-dot.done   { background: var(--success); box-shadow:0 0 0 2px var(--success); }
+    .tl-dot.warn   { background: var(--warning); box-shadow:0 0 0 2px var(--warning); }
+    .tl-dot.danger { background: var(--danger);  box-shadow:0 0 0 2px var(--danger); }
+    .tl-title { font-size:13px; font-weight:700; margin-bottom:3px; }
+    .tl-sub   { font-size:12px; color:var(--muted); }
+
+    /* ── PROGRESS ── */
+    .progress-bar {
+      background: #e0e9f0; border-radius: 6px; height: 8px;
+      overflow: hidden; margin-top: 4px;
+    }
+    .progress-fill {
+      height: 100%; border-radius: 6px;
+      transition: width .6s ease;
+    }
+
+    /* ── ALERT BOX ── */
+    .alert {
+      padding: 13px 16px; border-radius: 8px;
+      margin-bottom: 12px; font-size: 13px;
+      display: flex; align-items: flex-start; gap: 10px;
+    }
+    .alert-danger  { background:#fde8e8; border-left:4px solid var(--danger);  color:#7f1d1d; }
+    .alert-warning { background:#fef3cd; border-left:4px solid var(--warning); color:#7a4f00; }
+    .alert-info    { background:#dbeafe; border-left:4px solid var(--info);    color:#1e3a8a; }
+    .alert-success { background:#d1fae5; border-left:4px solid var(--success); color:#065f46; }
+    .alert-icon    { font-size: 18px; flex-shrink:0; }
+
+    /* ── ACCORDION ── */
+    .accord-item {
+      border: 1.5px solid var(--border);
+      border-radius: 8px; margin-bottom: 10px;
+      overflow: hidden;
+    }
+    .accord-head {
+      padding: 13px 16px;
+      cursor: pointer;
+      display: flex; justify-content: space-between; align-items: center;
+      background: #f7fafd; font-weight: 700; font-size: 13px;
+      user-select: none;
+    }
+    .accord-head:hover { background: #eef4fb; }
+    .accord-body {
+      display: none; padding: 14px 16px;
+      font-size: 13px; line-height: 1.7;
+      border-top: 1px solid var(--border);
+      background: #fff;
+    }
+    .accord-body.open { display: block; }
+
+    /* ── CHART BARS ── */
+    .bar-chart { display: flex; flex-direction: column; gap: 12px; }
+    .bar-row { display: flex; align-items: center; gap: 10px; font-size: 12px; }
+    .bar-label { width: 160px; flex-shrink:0; }
+    .bar-track {
+      flex:1; background:#e0e9f0; border-radius:5px; height:18px;
+      overflow:hidden;
+    }
+    .bar-fill {
+      height:100%; border-radius:5px; display:flex;
+      align-items:center; padding-left:8px;
+      color:#fff; font-size:11px; font-weight:700;
+      transition: width .6s;
+    }
+
+    /* ── DONUT ── */
+    .donut-wrap {
+      display: flex; align-items: center; gap: 24px; flex-wrap: wrap;
+    }
+    .donut-svg { flex-shrink:0; }
+    .donut-legend { display: flex; flex-direction: column; gap: 8px; font-size: 12px; }
+    .legend-row   { display: flex; align-items: center; gap: 8px; }
+    .legend-dot   { width:12px; height:12px; border-radius:3px; flex-shrink:0; }
+
+    /* ── SECTION TITLE ── */
+    .sec-title {
+      font-size: 13px; font-weight: 800;
+      color: var(--primary); text-transform: uppercase;
+      letter-spacing: .5px; margin-bottom: 12px;
+      padding-bottom: 6px; border-bottom: 2px solid var(--accent);
+      display: inline-block;
+    }
+
+    /* ── MODAL OVERLAY ── */
+    .modal-overlay {
+      display: none; position: fixed; inset:0;
+      background: rgba(0,0,0,.5); z-index:200;
+      align-items:center; justify-content:center;
+    }
+    .modal-overlay.open { display: flex; }
+    .modal {
+      background:#fff; border-radius:12px;
+      width: 90%; max-width:620px; max-height:90vh;
+      overflow-y:auto;
+      box-shadow:0 20px 60px rgba(0,0,0,.3);
+      animation: popIn .2s ease;
+    }
+    @keyframes popIn {
+      from { transform: scale(.92); opacity:0; }
+      to   { transform: scale(1);   opacity:1; }
+    }
+    .modal-header {
+      background: var(--primary); color:#fff;
+      padding:16px 22px;
+      display:flex; justify-content:space-between; align-items:center;
+      border-radius:12px 12px 0 0;
+    }
+    .modal-header h3 { font-size:15px; }
+    .modal-close {
+      background:none; border:none; color:#fff;
+      font-size:20px; cursor:pointer; line-height:1;
+    }
+    .modal-body { padding:22px; }
+
+    /* ── TOAST ── */
+    #toast {
+      position:fixed; bottom:24px; right:24px;
+      background:#1a3c5e; color:#fff;
+      padding:12px 20px; border-radius:8px;
+      font-size:13px; font-weight:600;
+      box-shadow:0 4px 16px rgba(0,0,0,.3);
+      display:none; z-index:300;
+      transition: opacity .3s;
+    }
+
+    /* ── PRINT ── */
+    @media print {
+      header, nav.tabs, .btn { display:none !important; }
+      .tab-section { display:block !important; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header>
+  <div class="logo">
+    <div class="icon">🏛️</div>
+    <div>
+      <h1>Dashboard Manajemen Risiko PPK</h1>
+      <p>Pejabat Pembuat Komitmen – Pengadaan Barang & Jasa Pemerintah</p>
+    </div>
+  </div>
+  <div class="meta">
+    <div id="clock"></div>
+    <div>TA 2025 | Unit: Dinas XYZ</div>
+  </div>
+</header>
+
+<!-- TABS -->
+<nav class="tabs">
+  <button class="active" onclick="showTab('beranda',this)">🏠 Beranda</button>
+  <button onclick="showTab('identifikasi',this)">🔍 Identifikasi Masalah <span class="badge" id="badge-id">0</span></button>
+  <button onclick="showTab('analisa',this)">📊 Analisa Masalah</button>
+  <button onclick="showTab('mitigasi',this)">🛡️ Alternatif & Mitigasi <span class="badge" id="badge-mit">0</span></button>
+  <button onclick="showTab('monitoring',this)">📋 Monitoring</button>
+</nav>
+
+<main>
+
+<!-- ══════════════════════════════════════
+     TAB 1 – BERANDA
+══════════════════════════════════════ -->
+<section id="tab-beranda" class="tab-section active">
+
+  <div class="kpi-row">
+    <div class="kpi red">
+      <div class="num" id="kpi-total">0</div>
+      <div class="lbl">Total Masalah Teridentifikasi</div>
+    </div>
+    <div class="kpi orange">
+      <div class="num" id="kpi-open">0</div>
+      <div class="lbl">Masalah Terbuka / Aktif</div>
+    </div>
+    <div class="kpi green">
+      <div class="num" id="kpi-solved">0</div>
+      <div class="lbl">Masalah Terselesaikan</div>
+    </div>
+    <div class="kpi blue">
+      <div class="num" id="kpi-mit">0</div>
+      <div class="lbl">Rencana Mitigasi Aktif</div>
+    </div>
+    <div class="kpi" style="border-left-color:var(--accent)">
+      <div class="num" id="kpi-critical" style="color:var(--danger)">0</div>
+      <div class="lbl">Risiko Kritis (Butuh Tindakan)</div>
+    </div>
+  </div>
+
+  <!-- ALERT BANNER -->
+  <div id="alerts-box"></div>
+
+  <div class="grid-2">
+    <!-- Distribusi risiko donut -->
+    <div class="card">
+      <div class="card-header"><h2>📊 Distribusi Tingkat Risiko</h2></div>
+      <div class="card-body">
+        <div class="donut-wrap">
+          <svg class="donut-svg" width="130" height="130" viewBox="0 0 42 42" id="donut-svg">
+            <circle cx="21" cy="21" r="15.915" fill="none" stroke="#e0e9f0" stroke-width="7"/>
+            <!-- segments added by JS -->
+          </svg>
+          <div class="donut-legend" id="donut-legend">
+            <div class="legend-row"><div class="legend-dot" style="background:#ef4444"></div> Kritis</div>
+            <div class="legend-row"><div class="legend-dot" style="background:#f97316"></div> Tinggi</div>
+            <div class="legend-row"><div class="legend-dot" style="background:#eab308"></div> Sedang</div>
+            <div class="legend-row"><div class="legend-dot" style="background:#22c55e"></div> Rendah</div>
+          </div>
+        </div>
+        <div id="donut-counts" style="margin-top:12px; font-size:12px; color:var(--muted)">Belum ada data masalah.</div>
+      </div>
+    </div>
+
+    <!-- Top masalah bar chart -->
+    <div class="card">
+      <div class="card-header"><h2>📌 Kategori Masalah Terbanyak</h2></div>
+      <div class="card-body">
+        <div class="bar-chart" id="bar-chart">
+          <div style="color:var(--muted); font-size:13px">Belum ada data.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Matriks Risiko -->
+  <div class="card">
+    <div class="card-header"><h2>🗺️ Matriks Risiko (Dampak vs Kemungkinan)</h2></div>
+    <div class="card-body">
+      <div class="matrix-wrap">
+        <table class="risk-matrix">
+          <tr>
+            <td class="axis-label" style="width:90px">Kemungkinan ↓ / Dampak →</td>
+            <th class="axis-label">Sangat Rendah</th>
+            <th class="axis-label">Rendah</th>
+            <th class="axis-label">Sedang</th>
+            <th class="axis-label">Tinggi</th>
+            <th class="axis-label">Sangat Tinggi</th>
+          </tr>
+          <tr>
+            <td class="axis-label">Hampir Pasti</td>
+            <td class="cell-med">Sedang</td>
+            <td class="cell-high">Tinggi</td>
+            <td class="cell-critical">Kritis</td>
+            <td class="cell-critical">Kritis</td>
+            <td class="cell-critical">Kritis</td>
+          </tr>
+          <tr>
+            <td class="axis-label">Kemungkinan Besar</td>
+            <td class="cell-low">Rendah</td>
+            <td class="cell-med">Sedang</td>
+            <td class="cell-high">Tinggi</td>
+            <td class="cell-critical">Kritis</td>
+            <td class="cell-critical">Kritis</td>
+          </tr>
+          <tr>
+            <td class="axis-label">Mungkin</td>
+            <td class="cell-low">Rendah</td>
+            <td class="cell-med">Sedang</td>
+            <td class="cell-high">Tinggi</td>
+            <td class="cell-high">Tinggi</td>
+            <td class="cell-critical">Kritis</td>
+          </tr>
+          <tr>
+            <td class="axis-label">Tidak Mungkin</td>
+            <td class="cell-low">Rendah</td>
+            <td class="cell-low">Rendah</td>
+            <td class="cell-med">Sedang</td>
+            <td class="cell-high">Tinggi</td>
+            <td class="cell-high">Tinggi</td>
+          </tr>
+          <tr>
+            <td class="axis-label">Sangat Tidak Mungkin</td>
+            <td class="cell-low">Rendah</td>
+            <td class="cell-low">Rendah</td>
+            <td class="cell-low">Rendah</td>
+            <td class="cell-med">Sedang</td>
+            <td class="cell-med">Sedang</td>
+          </tr>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- Dasar Hukum -->
+  <div class="card">
+    <div class="card-header"><h2>📜 Dasar Hukum & Referensi PPK</h2></div>
+    <div class="card-body">
+      <div class="accord-item"><div class="accord-head" onclick="toggleAccord(this)">Perpres 16/2018 jo. Perpres 12/2021 – Pengadaan Barang/Jasa Pemerintah <span>▾</span></div><div class="accord-body">Mengatur tugas, kewenangan, dan tanggung jawab PPK dalam siklus pengadaan, mulai dari perencanaan, pemilihan penyedia, pelaksanaan kontrak hingga serah terima.</div></div>
+      <div class="accord-item"><div class="accord-head" onclick="toggleAccord(this)">Perlem LKPP 12/2021 – Pedoman Pelaksanaan PBJ <span>▾</span></div><div class="accord-body">Petunjuk teknis pelaksanaan pengadaan, termasuk penyusunan HPS, dokumen pemilihan, evaluasi penawaran, dan pengelolaan kontrak.</div></div>
+      <div class="accord-item"><div class="accord-head" onclick="toggleAccord(this)">PP 60/2008 – SPIP (Sistem Pengendalian Intern Pemerintah) <span>▾</span></div><div class="accord-body">Kerangka pengendalian internal yang wajib diterapkan PPK: penilaian risiko, aktivitas pengendalian, informasi & komunikasi, serta pemantauan.</div></div>
+      <div class="accord-item"><div class="accord-head" onclick="toggleAccord(this)">UU 17/2003 & UU 1/2004 – Keuangan Negara & Perbendaharaan <span>▾</span></div><div class="accord-body">Landasan hukum pengelolaan keuangan negara yang menjadi tanggung jawab PPK selaku pengguna anggaran dalam unit kerjanya.</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════
+     TAB 2 – IDENTIFIKASI MASALAH
+══════════════════════════════════════ -->
+<section id="tab-identifikasi" class="tab-section">
+
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-header"><h2>➕ Tambah Masalah Baru</h2></div>
+      <div class="card-body">
+        <div class="form-group">
+          <label>Judul Masalah *</label>
+          <input id="f-judul" type="text" placeholder="Contoh: Keterlambatan penyerahan dokumen teknis"/>
+        </div>
+        <div class="form-group">
+          <label>Kategori *</label>
+          <select id="f-kategori">
+            <option value="">-- Pilih --</option>
+            <option>Perencanaan</option>
+            <option>Dokumen Pengadaan</option>
+            <option>Penyedia / Vendor</option>
+            <option>Kontrak & Pelaksanaan</option>
+            <option>Anggaran & Keuangan</option>
+            <option>Administrasi & Legalitas</option>
+            <option>SDM & Kompetensi</option>
+            <option>Teknologi & Sistem</option>
+            <option>Kepatuhan & Regulasi</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Deskripsi Masalah *</label>
+          <textarea id="f-deskripsi" placeholder="Uraikan masalah secara lengkap: apa, siapa, kapan, di mana..."></textarea>
+        </div>
+        <div class="grid-2" style="gap:12px">
+          <div class="form-group">
+            <label>Kemungkinan Terjadi</label>
+            <select id="f-kemungkinan">
+              <option value="1">1 – Sangat Tidak Mungkin</option>
+              <option value="2">2 – Tidak Mungkin</option>
+              <option value="3" selected>3 – Mungkin</option>
+              <option value="4">4 – Kemungkinan Besar</option>
+              <option value="5">5 – Hampir Pasti</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Dampak</label>
+            <select id="f-dampak">
+              <option value="1">1 – Sangat Rendah</option>
+              <option value="2">2 – Rendah</option>
+              <option value="3" selected>3 – Sedang</option>
+              <option value="4">4 – Tinggi</option>
+              <option value="5">5 – Sangat Tinggi</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Pihak Terdampak / Pelapor</label>
+          <input id="f-pihak" type="text" placeholder="Contoh: Tim Pengadaan, KPA, Vendor..."/>
+        </div>
+        <div class="form-group">
+          <label>Tanggal Identifikasi</label>
+          <input id="f-tanggal" type="date"/>
+        </div>
+        <button class="btn btn-primary" onclick="tambahMasalah()">💾 Simpan Masalah</button>
+      </div>
+    </div>
+
+    <!-- Panduan Identifikasi -->
+    <div class="card">
+      <div class="card-header"><h2>💡 Panduan Identifikasi Masalah PPK</h2></div>
+      <div class="card-body">
+        <div class="alert alert-info">
+          <span class="alert-icon">ℹ️</span>
+          <span>Gunakan kerangka <strong>5W+1H</strong> dan <strong>fishbone diagram</strong> untuk menggali akar masalah secara sistematis.</span>
+        </div>
+        <div class="sec-title">Area Rawan Masalah PPK</div>
+        <div class="timeline">
+          <div class="tl-item"><div class="tl-dot"></div><div class="tl-title">Perencanaan & RUP</div><div class="tl-sub">Jadwal tidak realistis, HPS tidak akurat, spesifikasi teknis tidak jelas</div></div>
+          <div class="tl-item"><div class="tl-dot warn"></div><div class="tl-title">Proses Pemilihan Penyedia</div><div class="tl-sub">Dokumen lelang tidak lengkap, evaluasi tidak transparan, sanggah berulang</div></div>
+          <div class="tl-item"><div class="tl-dot warn"></div><div class="tl-title">Pengelolaan Kontrak</div><div class="tl-sub">Addendum tanpa dasar, keterlambatan penyedia, denda tidak diterapkan</div></div>
+          <div class="tl-item"><div class="tl-dot danger"></div><div class="tl-title">Pembayaran & Keuangan</div><div class="tl-sub">BAST tidak sesuai volume, tagihan ganda, retensi tidak diperhitungkan</div></div>
+          <div class="tl-item"><div class="tl-dot danger"></div><div class="tl-title">Kepatuhan & Pelaporan</div><div class="tl-sub">Laporan progres terlambat, dokumen tidak terarsi, temuan BPK/APIP</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TABEL MASALAH -->
+  <div class="card">
+    <div class="card-header">
+      <h2>📋 Daftar Masalah Teridentifikasi</h2>
+      <div style="display:flex;gap:8px">
+        <input id="search-masalah" oninput="renderTable()" type="text"
+          placeholder="Cari…" style="padding:6px 10px;border-radius:6px;border:1px solid rgba(255,255,255,.3);background:rgba(255,255,255,.15);color:#fff;font-size:12px;width:180px"/>
+        <button class="btn btn-success btn-sm" onclick="exportCSV()">⬇ Export CSV</button>
+      </div>
+    </div>
+    <div class="card-body">
+      <div class="tbl-wrap">
+        <table id="tbl-masalah">
+          <thead>
+            <tr>
+              <th>#</th><th>Judul</th><th>Kategori</th>
+              <th>Kemungkinan</th><th>Dampak</th><th>Skor Risiko</th>
+              <th>Status</th><th>Tanggal</th><th>Aksi</th>
+            </tr>
+          </thead>
+          <tbody id="tbody-masalah">
+            <tr><td colspan="9" style="text-align:center;color:var(--muted);padding:24px">Belum ada masalah dicatat.</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════
+     TAB 3 – ANALISA MASALAH
+══════════════════════════════════════ -->
+<section id="tab-analisa" class="tab-section">
+
+  <!-- Fishbone / 5 Why -->
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-header"><h2>🐠 Template Fishbone (Ishikawa)</h2></div>
+      <div class="card-body">
+        <div class="form-group">
+          <label>Pilih Masalah yang Dianalisa</label>
+          <select id="sel-fishbone" onchange="loadFishbone()">
+            <option value="">-- Pilih Masalah --</option>
+          </select>
+        </div>
+        <div id="fishbone-area">
+          <div class="alert alert-info"><span class="alert-icon">ℹ️</span> Pilih masalah dari dropdown untuk mengisi analisa fishbone.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header"><h2>❓ Analisa 5 Whys</h2></div>
+      <div class="card-body">
+        <div class="form-group">
+          <label>Pilih Masalah</label>
+          <select id="sel-5why" onchange="load5Why()">
+            <option value="">-- Pilih Masalah --</option>
+          </select>
+        </div>
+        <div id="why-area">
+          <div class="alert alert-info"><span class="alert-icon">ℹ️</span> Pilih masalah untuk mengisi 5 Whys.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Tabel analisa ringkas -->
+  <div class="card">
+    <div class="card-header"><h2>📈 Rangkuman Analisa Masalah</h2></div>
+    <div class="card-body">
+      <div class="tbl-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>No</th><th>Masalah</th><th>Akar Penyebab</th>
+              <th>Dampak Terhadap Kontrak</th><th>Dampak Keuangan</th>
+              <th>Risiko Regulasi</th><th>Level Urgensi</th>
+            </tr>
+          </thead>
+          <tbody id="tbody-analisa">
+            <tr><td colspan="7" style="text-align:center;color:var(--muted);padding:24px">Tambahkan masalah & analisa terlebih dahulu.</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- Framework Analisa -->
+  <div class="card">
+    <div class="card-header"><h2>🧩 Framework Analisa Risiko PPK (SPIP-Based)</h2></div>
+    <div class="card-body">
+      <div class="grid-2">
+        <div>
+          <div class="sec-title">Komponen Analisa</div>
+          <div class="accord-item"><div class="accord-head" onclick="toggleAccord(this)">1. Identifikasi Sumber Risiko <span>▾</span></div><div class="accord-body">Tentukan apakah risiko bersumber dari <strong>internal</strong> (SDM, proses, sistem) atau <strong>eksternal</strong> (regulasi, pasar, bencana). PPK wajib mendokumentasikan register risiko sesuai PP 60/2008.</div></div>
+          <div class="accord-item"><div class="accord-head" onclick="toggleAccord(this)">2. Penilaian Kemungkinan & Dampak <span>▾</span></div><div class="accord-body">Gunakan skala 1–5 untuk kemungkinan dan dampak. Skor risiko = Kemungkinan × Dampak. Skor ≥ 15: Kritis; 10–14: Tinggi; 5–9: Sedang; 1–4: Rendah.</div></div>
+          <div class="accord-item"><div class="accord-head" onclick="toggleAccord(this)">3. Analisa Akar Masalah (RCA) <span>▾</span></div><div class="accord-body">Gunakan metode <strong>Fishbone Ishikawa</strong> (6M: Man, Machine, Method, Material, Measurement, Milieu) atau <strong>5 Whys</strong> untuk menemukan penyebab dasar, bukan hanya gejala.</div></div>
+          <div class="accord-item"><div class="accord-head" onclick="toggleAccord(this)">4. Peta Pemangku Kepentingan <span>▾</span></div><div class="accord-body">Identifikasi stakeholder yang terdampak: KPA, Bendahara, Pokja ULP, Penyedia, APIP, BPK. Tentukan tingkat pengaruh dan kepentingan masing-masing.</div></div>
+        </div>
+        <div>
+          <div class="sec-title">Skema Penilaian Risiko</div>
+          <div class="bar-chart">
+            <div class="bar-row"><div class="bar-label">Kemungkinan × Dampak ≥ 20</div><div class="bar-track"><div class="bar-fill" style="width:100%;background:#ef4444">Kritis</div></div></div>
+            <div class="bar-row"><div class="bar-label">Skor 15–19</div><div class="bar-track"><div class="bar-fill" style="width:80%;background:#f97316">Tinggi</div></div></div>
+            <div class="bar-row"><div class="bar-label">Skor 10–14</div><div class="bar-track"><div class="bar-fill" style="width:60%;background:#eab308">Sedang</div></div></div>
+            <div class="bar-row"><div class="bar-label">Skor 5–9</div><div class="bar-track"><div class="bar-fill" style="width:40%;background:#22c55e">Rendah</div></div></div>
+            <div class="bar-row"><div class="bar-label">Skor 1–4</div><div class="bar-track"><div class="bar-fill" style="width:20%;background:#86efac">Sangat Rendah</div></div></div>
+          </div>
+          <div class="alert alert-warning" style="margin-top:16px">
+            <span class="alert-icon">⚠️</span>
+            <span>PPK bertanggung jawab secara pribadi atas kerugian negara akibat kelalaian. Pastikan setiap keputusan didukung dokumen yang kuat.</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════
+     TAB 4 – MITIGASI
+══════════════════════════════════════ -->
+<section id="tab-mitigasi" class="tab-section">
+
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-header"><h2>🛡️ Rencana Mitigasi Risiko</h2></div>
+      <div class="card-body">
+        <div class="form-group">
+          <label>Masalah / Risiko yang Dimitigasi *</label>
+          <select id="mit-masalah">
+            <option value="">-- Pilih Masalah --</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Strategi Mitigasi *</label>
+          <select id="mit-strategi">
+            <option value="">-- Pilih Strategi --</option>
+            <option>Menghindari (Risk Avoidance)</option>
+            <option>Mengurangi (Risk Reduction)</option>
+            <option>Mengalihkan (Risk Transfer)</option>
+            <option>Menerima (Risk Acceptance)</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Rencana Aksi / Tindakan *</label>
+          <textarea id="mit-aksi" placeholder="Tuliskan langkah-langkah konkret yang akan diambil..."></textarea>
+        </div>
+        <div class="grid-2" style="gap:12px">
+          <div class="form-group">
+            <label>Penanggung Jawab</label>
+            <input id="mit-pj" type="text" placeholder="Nama/Jabatan"/>
+          </div>
+          <div class="form-group">
+            <label>Deadline</label>
+            <input id="mit-deadline" type="date"/>
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Sumber Daya yang Dibutuhkan</label>
+          <input id="mit-sdm" type="text" placeholder="Anggaran, SDM, regulasi pendukung..."/>
+        </div>
+        <button class="btn btn-success" onclick="tambahMitigasi()">💾 Simpan Rencana Mitigasi</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header"><h2>📚 Alternatif Solusi Berdasarkan Kategori</h2></div>
+      <div class="card-body">
+        <div class="accord-item"><div class="accord-head" onclick="toggleAccord(this)">📅 Masalah Perencanaan & RUP <span>▾</span></div>
+        <div class="accord-body">
+          <ul style="padding-left:16px;line-height:2">
+            <li>Lakukan reviu RUP bersama tim teknis sebelum diumumkan</li>
+            <li>Gunakan data historis pengadaan tahun lalu sebagai baseline HPS</li>
+            <li>Libatkan konsultan independen untuk spesifikasi teknis kompleks</li>
+            <li>Tetapkan buffer waktu minimal 15% dari total jadwal</li>
+          </ul>
+        </div></div>
+        <div class="accord-item"><div class="accord-head" onclick="toggleAccord(this)">📄 Masalah Dokumen Pengadaan <span>▾</span></div>
+        <div class="accord-body">
+          <ul style="padding-left:16px;line-height:2">
+            <li>Gunakan template standar LKPP dan checklist kelengkapan dokumen</li>
+            <li>Terapkan review 4-mata (dual control) sebelum dokumen diterbitkan</li>
+            <li>Digitalisasi arsip dokumen dengan sistem DMS berbasis cloud</li>
+            <li>Pastikan KAK/TOR disusun oleh tenaga ahli yang kompeten</li>
+          </ul>
+        </div></div>
+        <div class="accord-item"><div class="accord-head" onclick="toggleAccord(this)">🏗️ Masalah Kontrak & Pelaksanaan <span>▾</span></div>
+        <div class="accord-body">
+          <ul style="padding-left:16px;line-height:2">
+            <li>Terapkan monitoring progres mingguan dengan laporan tertulis</li>
+            <li>Aktifkan klausul denda keterlambatan sejak hari pertama terlambat</li>
+            <li>Siapkan mekanisme addendum yang jelas dalam dokumen kontrak</li>
+            <li>Tunjuk pengawas lapangan (direksi lapangan) yang kompeten</li>
+          </ul>
+        </div></div>
+        <div class="accord-item"><div class="accord-head" onclick="toggleAccord(this)">💰 Masalah Anggaran & Keuangan <span>▾</span></div>
+        <div class="accord-body">
+          <ul style="padding-left:16px;line-height:2">
+            <li>Koordinasi rutin dengan bendahara dan PPTK untuk kendali pagu</li>
+            <li>Pastikan BAST diverifikasi tim penerima barang sebelum ditandatangani</li>
+            <li>Buat estimasi cashflow pembayaran dalam rencana anggaran</li>
+            <li>Simpan jaminan pelaksanaan dan jaminan uang muka dengan aman</li>
+          </ul>
+        </div></div>
+        <div class="accord-item"><div class="accord-head" onclick="toggleAccord(this)">⚖️ Masalah Kepatuhan & Hukum <span>▾</span></div>
+        <div class="accord-body">
+          <ul style="padding-left:16px;line-height:2">
+            <li>Konsultasikan setiap keputusan signifikan dengan APIP/konsultan hukum</li>
+            <li>Ikuti bimtek/pelatihan pengadaan minimal 1x setahun</li>
+            <li>Buat catatan kronologis setiap keputusan beserta dasar hukumnya</li>
+            <li>Manfaatkan layanan konsultasi LKPP untuk kasus non-standar</li>
+          </ul>
+        </div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Tabel mitigasi -->
+  <div class="card">
+    <div class="card-header"><h2>📋 Daftar Rencana Mitigasi</h2></div>
+    <div class="card-body">
+      <div class="tbl-wrap">
+        <table id="tbl-mitigasi">
+          <thead>
+            <tr>
+              <th>#</th><th>Masalah Terkait</th><th>Strategi</th>
+              <th>Rencana Aksi</th><th>PJ</th>
+              <th>Deadline</th><th>Status</th><th>Aksi</th>
+            </tr>
+          </thead>
+          <tbody id="tbody-mitigasi">
+            <tr><td colspan="8" style="text-align:center;color:var(--muted);padding:24px">Belum ada rencana mitigasi.</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════
+     TAB 5 – MONITORING
+══════════════════════════════════════ -->
+<section id="tab-monitoring" class="tab-section">
+
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-header"><h2>📊 Progress Penyelesaian</h2></div>
+      <div class="card-body" id="progress-area">
+        <div style="color:var(--muted);font-size:13px">Belum ada data untuk ditampilkan.</div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-header"><h2>🗓️ Jadwal Tinjauan (Review Schedule)</h2></div>
+      <div class="card-body">
+        <div class="alert alert-info">
+          <span class="alert-icon">📅</span>
+          <div>
+            <strong>Siklus Review yang Disarankan:</strong>
+            <ul style="padding-left:16px;margin-top:6px;line-height:2;font-size:12px">
+              <li><strong>Harian:</strong> Cek progres lapangan & komunikasi penyedia</li>
+              <li><strong>Mingguan:</strong> Review laporan progres & kendala teknis</li>
+              <li><strong>Bulanan:</strong> Evaluasi kontrak, pembayaran, dan risiko baru</li>
+              <li><strong>Triwulan:</strong> Audit internal bersama APIP</li>
+              <li><strong>Tahunan:</strong> Reviu menyeluruh & pembaruan register risiko</li>
+            </ul>
+          </div>
+        </div>
+        <div class="form-group" style="margin-top:12px">
+          <label>Tambah Jadwal Review</label>
+          <input id="rev-judul" type="text" placeholder="Judul review / agenda"/>
+        </div>
+        <div class="grid-2" style="gap:10px">
+          <div class="form-group">
+            <label>Tanggal</label>
+            <input id="rev-tgl" type="date"/>
+          </div>
+          <div class="form-group">
+            <label>Peserta</label>
+            <input id="rev-peserta" type="text" placeholder="Nama/Tim"/>
+          </div>
+        </div>
+        <button class="btn btn-primary btn-sm" onclick="tambahReview()">+ Tambah</button>
+        <div id="jadwal-list" style="margin-top:16px"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Update status -->
+  <div class="card">
+    <div class="card-header"><h2>✏️ Update Status Masalah & Mitigasi</h2></div>
+    <div class="card-body">
+      <div class="grid-2">
+        <div>
+          <div class="sec-title">Update Status Masalah</div>
+          <div class="form-group">
+            <label>Pilih Masalah</label>
+            <select id="upd-masalah">
+              <option value="">-- Pilih --</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Status Baru</label>
+            <select id="upd-status-masalah">
+              <option>Terbuka</option>
+              <option>Sedang Diproses</option>
+              <option>Terselesaikan</option>
+              <option>Ditutup (Accepted)</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Catatan</label>
+            <textarea id="upd-catatan-m" placeholder="Perkembangan terbaru..."></textarea>
+          </div>
+          <button class="btn btn-primary btn-sm" onclick="updateStatusMasalah()">💾 Update</button>
+        </div>
+        <div>
+          <div class="sec-title">Update Status Mitigasi</div>
+          <div class="form-group">
+            <label>Pilih Mitigasi</label>
+            <select id="upd-mitigasi">
+              <option value="">-- Pilih --</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Status Baru</label>
+            <select id="upd-status-mitigasi">
+              <option>Belum Dimulai</option>
+              <option>Sedang Berjalan</option>
+              <option>Selesai</option>
+              <option>Dibatalkan</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Persentase Kemajuan</label>
+            <input id="upd-persen" type="range" min="0" max="100" value="0"
+              oninput="document.getElementById('persen-val').textContent=this.value+'%'"/>
+            <span id="persen-val" style="font-size:12px;color:var(--secondary)">0%</span>
+          </div>
+          <button class="btn btn-success btn-sm" onclick="updateStatusMitigasi()">💾 Update</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Log Aktivitas -->
+  <div class="card">
+    <div class="card-header"><h2>📝 Log Aktivitas</h2></div>
+    <div class="card-body">
+      <div id="activity-log" style="font-size:12px;color:var(--muted)">Belum ada aktivitas.</div>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<!-- MODAL DETAIL MASALAH -->
+<div class="modal-overlay" id="modal-overlay" onclick="closeModal(event)">
+  <div class="modal" id="modal">
+    <div class="modal-header">
+      <h3 id="modal-title">Detail Masalah</h3>
+      <button class="modal-close" onclick="document.getElementById('modal-overlay').classList.remove('open')">✕</button>
+    </div>
+    <div class="modal-body" id="modal-body"></div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div id="toast"></div>
+
+<script>
+// ── DATA STORE ──────────────────────────────────────────────
+let masalahList  = JSON.parse(localStorage.getItem('ppk_masalah')  || '[]');
+let mitigasiList = JSON.parse(localStorage.getItem('ppk_mitigasi') || '[]');
+let reviewList   = JSON.parse(localStorage.getItem('ppk_review')   || '[]');
+let activityLog  = JSON.parse(localStorage.getItem('ppk_log')      || '[]');
+
+function save(){
+  localStorage.setItem('ppk_masalah',  JSON.stringify(masalahList));
+  localStorage.setItem('ppk_mitigasi', JSON.stringify(mitigasiList));
+  localStorage.setItem('ppk_review',   JSON.stringify(reviewList));
+  localStorage.setItem('ppk_log',      JSON.stringify(activityLog));
+}
+
+// ── CLOCK ────────────────────────────────────────────────────
+function updateClock(){
+  const now = new Date();
+  document.getElementById('clock').textContent =
+    now.toLocaleDateString('id-ID',{weekday:'long',day:'numeric',month:'long',year:'numeric'}) +
+    ' · ' + now.toLocaleTimeString('id-ID');
+}
+setInterval(updateClock, 1000); updateClock();
+
+// ── TABS ─────────────────────────────────────────────────────
+function showTab(id, btn){
+  document.querySelectorAll('.tab-section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('nav.tabs button').forEach(b => b.classList.remove('active'));
+  document.getElementById('tab-'+id).classList.add('active');
+  btn.classList.add('active');
+  refreshAll();
+}
+
+// ── TOAST ────────────────────────────────────────────────────
+function toast(msg, color='#1a3c5e'){
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.style.background = color;
+  t.style.display = 'block';
+  setTimeout(()=>{ t.style.display='none'; }, 3000);
+}
+
+// ── RISK SCORE ───────────────────────────────────────────────
+function riskScore(k,d){ return k*d; }
+function riskLabel(s){
+  if(s>=20) return {l:'Kritis',  c:'risk-critical'};
+  if(s>=15) return {l:'Tinggi',  c:'risk-high'};
+  if(s>=10) return {l:'Sedang',  c:'risk-medium'};
+  return             {l:'Rendah', c:'risk-low'};
+}
+function statusBadge(s){
+  const m = {
+    'Terbuka':         'badge-red',
+    'Sedang Diproses': 'badge-orange',
+    'Terselesaikan':   'badge-green',
+    'Ditutup (Accepted)':'badge-gray'
+  };
+  return `<span class="badge ${m[s]||'badge-gray'}">${s}</span>`;
+}
+function mitStatusBadge(s){
+  const m = {
+    'Belum Dimulai':'badge-gray',
+    'Sedang Berjalan':'badge-orange',
+    'Selesai':'badge-green',
+    'Dibatalkan':'badge-red'
+  };
+  return `<span class="badge ${m[s]||'badge-gray'}">${s}</span>`;
+}
+
+// ── LOG ──────────────────────────────────────────────────────
+function addLog(msg){
+  const ts = new Date().toLocaleString('id-ID');
+  activityLog.unshift({ts, msg});
+  if(activityLog.length>50) activityLog.pop();
+  save();
+  renderLog();
+}
+function renderLog(){
+  const el = document.getElementById('activity-log');
+  if(!activityLog.length){ el.textContent='Belum ada aktivitas.'; return; }
+  el.innerHTML = activityLog.map(l=>
+    `<div style="border-bottom:1px solid var(--border);padding:6px 0">
+      <span style="color:var(--secondary);font-weight:700">[${l.ts}]</span> ${l.msg}
+    </div>`
+  ).join('');
+}
+
+// ── TAMBAH MASALAH ───────────────────────────────────────────
+function tambahMasalah(){
+  const judul  = document.getElementById('f-judul').value.trim();
+  const kat    = document.getElementById('f-kategori').value;
+  const desk   = document.getElementById('f-deskripsi').value.trim();
+  const k      = +document.getElementById('f-kemungkinan').value;
+  const d      = +document.getElementById('f-dampak').value;
+  const pihak  = document.getElementById('f-pihak').value.trim();
+  const tgl    = document.getElementById('f-tanggal').value || new Date().toISOString().split('T')[0];
+
+  if(!judul || !kat || !desk){ toast('Lengkapi semua field wajib!','#c0392b'); return; }
+
+  const item = {
+    id: Date.now(), judul, kat, desk, k, d,
+    skor: riskScore(k,d), pihak, tgl,
+    status:'Terbuka',
+    fishbone:{man:'',machine:'',method:'',material:'',measurement:'',milieu:''},
+    whys:['','','','',''],
+    catatan:''
+  };
+  masalahList.push(item);
+  save();
+
+  // reset form
+  ['f-judul','f-deskripsi','f-pihak'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('f-kategori').value='';
+  document.getElementById('f-kemungkinan').value='3';
+  document.getElementById('f-dampak').value='3';
+
+  addLog(`Masalah baru ditambahkan: "${judul}"`);
+  toast('Masalah berhasil disimpan!','#27ae60');
+  refreshAll();
+}
+
+// ── RENDER TABLE MASALAH ─────────────────────────────────────
+function renderTable(){
+  const q = (document.getElementById('search-masalah')?.value||'').toLowerCase();
+  const tb = document.getElementById('tbody-masalah');
+  const data = masalahList.filter(m=>
+    m.judul.toLowerCase().includes(q)||m.kat.toLowerCase().includes(q)
+  );
+  if(!data.length){
+    tb.innerHTML='<tr><td colspan="9" style="text-align:center;color:var(--muted);padding:24px">Tidak ada data.</td></tr>';
+    return;
+  }
+  tb.innerHTML = data.map((m,i)=>{
+    const r = riskLabel(m.skor);
+    return `<tr>
+      <td>${i+1}</td>
+      <td><strong>${m.judul}</strong><br><small style="color:var(--muted)">${m.pihak}</small></td>
+      <td><span class="badge badge-blue">${m.kat}</span></td>
+      <td>${m.k}</td><td>${m.d}</td>
+      <td><span class="risk-pill ${r.c}">${m.skor} – ${r.l}</span></td>
+      <td>${statusBadge(m.status)}</td>
+      <td>${m.tgl}</td>
+      <td>
+        <button class="btn btn-primary btn-sm" onclick="showDetail(${m.id})">👁 Detail</button>
+        <button class="btn btn-danger btn-sm" onclick="hapusMasalah(${m.id})">🗑</button>
+      </td>
+    </tr>`;
+  }).join('');
+}
+
+// ── HAPUS MASALAH ────────────────────────────────────────────
+function hapusMasalah(id){
+  if(!confirm('Yakin hapus masalah ini?')) return;
+  const m = masalahList.find(x=>x.id===id);
+  masalahList = masalahList.filter(x=>x.id!==id);
+  save();
+  addLog(`Masalah dihapus: "${m?.judul}"`);
+  toast('Masalah dihapus.','#e67e22');
+  refreshAll();
+}
+
+// ── DETAIL MODAL ─────────────────────────────────────────────
+function showDetail(id){
+  const m = masalahList.find(x=>x.id===id); if(!m) return;
+  const r = riskLabel(m.skor);
+  document.getElementById('modal-title').textContent = m.judul;
+  document.getElementById('modal-body').innerHTML = `
+    <div style="display:grid;gap:12px">
+      <div class="alert alert-${r.c.includes('critical')?'danger':r.c.includes('high')?'danger':r.c.includes('medium')?'warning':'success'}">
+        <span class="alert-icon">🎯</span>
+        <strong>Level Risiko: ${r.l}</strong> | Skor: ${m.skor} (Kemungkinan ${m.k} × Dampak ${m.d})
+      </div>
+      <table style="font-size:13px;width:100%">
+        <tr><td style="color:var(--muted);width:140px">Kategori</td><td><strong>${m.kat}</strong></td></tr>
+        <tr><td style="color:var(--muted)">Pihak Terdampak</td><td>${m.pihak||'-'}</td></tr>
+        <tr><td style="color:var(--muted)">Tanggal</td><td>${m.tgl}</td></tr>
+        <tr><td style="color:var(--muted)">Status</td><td>${statusBadge(m.status)}</td></tr>
+      </table>
+      <div><strong>Deskripsi:</strong><br><div style="margin-top:4px;padding:10px;background:#f7fafd;border-radius:6px;font-size:13px">${m.desk}</div></div>
+      ${m.catatan ? `<div><strong>Catatan Terbaru:</strong><br><div style="margin-top:4px;padding:10px;background:#fffde7;border-radius:6px;font-size:13px">${m.catatan}</div></div>` : ''}
+    </div>
+  `;
+  document.getElementById('modal-overlay').classList.add('open');
+}
+function closeModal(e){
+  if(e.target===document.getElementById('modal-overlay'))
+    document.getElementById('modal-overlay').classList.remove('open');
+}
+
+// ── FISHBONE ─────────────────────────────────────────────────
+function populateSelects(){
+  ['sel-fishbone','sel-5why','mit-masalah','upd-masalah','upd-mitigasi'].forEach(id=>{
+    const el = document.getElementById(id); if(!el) return;
+    const prev = el.value;
+    el.innerHTML = '<option value="">-- Pilih --</option>' +
+      masalahList.map(m=>`<option value="${m.id}">${m.judul}</option>`).join('');
+    if(prev) el.value = prev;
+  });
+  const um = document.getElementById('upd-mitigasi');
+  if(um){
+    um.innerHTML = '<option value="">-- Pilih --</option>' +
+      mitigasiList.map((m,i)=>`<option value="${i}">#${i+1} – ${m.masalahJudul?.slice(0,30)||'?'}: ${m.strategi}</option>`).join('');
+  }
+}
+
+const fishboneLabels = {man:'👤 Man (SDM)',machine:'⚙️ Machine (Alat/Sistem)',method:'📋 Method (Prosedur)',material:'📦 Material (Dokumen/Bahan)',measurement:'📏 Measurement (Standar)',milieu:'🌍 Milieu (Lingkungan)'};
+
+function loadFishbone(){
+  const id = +document.getElementById('sel-fishbone').value;
+  const m  = masalahList.find(x=>x.id===id);
+  const area = document.getElementById('fishbone-area');
+  if(!m){ area.innerHTML='<div class="alert alert-info"><span class="alert-icon">ℹ️</span> Pilih masalah dari dropdown.</div>'; return; }
+  area.innerHTML = `
+    <div class="alert alert-warning"><span class="alert-icon">🐠</span><strong>Analisa Fishbone untuk:</strong> ${m.judul}</div>
+    ${Object.entries(fishboneLabels).map(([k,lbl])=>`
+    <div class="form-group">
+      <label>${lbl}</label>
+      <textarea id="fb-${k}" placeholder="Penyebab dari ${lbl}..." style="min-height:55px" onchange="saveFishbone(${id})">${m.fishbone[k]||''}</textarea>
+    </div>`).join('')}
+    <button class="btn btn-success btn-sm" onclick="saveFishbone(${id})">💾 Simpan Fishbone</button>
+  `;
+}
+
+function saveFishbone(id){
+  const m = masalahList.find(x=>x.id===id); if(!m) return;
+  Object.keys(fishboneLabels).forEach(k=>{
+    const el = document.getElementById('fb-'+k); if(el) m.fishbone[k]=el.value;
+  });
+  save();
+  toast('Fishbone tersimpan!','#27ae60');
+  refreshAnalisa();
+}
+
+function load5Why(){
+  const id = +document.getElementById('sel-5why').value;
+  const m  = masalahList.find(x=>x.id===id);
+  const area = document.getElementById('why-area');
+  if(!m){ area.innerHTML='<div class="alert alert-info"><span class="alert-icon">ℹ️</span> Pilih masalah dari dropdown.</div>'; return; }
+  area.innerHTML = `
+    <div class="alert alert-warning"><span class="alert-icon">❓</span><strong>5 Whys untuk:</strong> ${m.judul}</div>
+    ${[1,2,3,4,5].map(n=>`
+    <div class="form-group">
+      <label>Why ${n}${n===1?' (Gejala/Masalah Langsung)':n===5?' (Akar Masalah Sesungguhnya)':''}</label>
+      <input type="text" id="why-${n}" placeholder="Mengapa hal ini terjadi?" value="${m.whys[n-1]||''}" onchange="save5Why(${id})"/>
+    </div>`).join('')}
+    <button class="btn btn-success btn-sm" onclick="save5Why(${id})">💾 Simpan 5 Whys</button>
+  `;
+}
+
+function save5Why(id){
+  const m = masalahList.find(x=>x.id===id); if(!m) return;
+  m.whys = [1,2,3,4,5].map(n=>{ const el=document.getElementById('why-'+n); return el?el.value:''; });
+  save();
+  toast('5 Whys tersimpan!','#27ae60');
+  refreshAnalisa();
+}
+
+// ── ANALISA TABLE ────────────────────────────────────────────
+function refreshAnalisa(){
+  const tb = document.getElementById('tbody-analisa');
+  if(!masalahList.length){
+    tb.innerHTML='<tr><td colspan="7" style="text-align:center;color:var(--muted);padding:24px">Tambahkan masalah & analisa terlebih dahulu.</td></tr>';
+    return;
+  }
+  const r = riskLabel;
+  tb.innerHTML = masalahList.map((m,i)=>{
+    const rl = r(m.skor);
+    const akarFish = Object.values(m.fishbone).filter(Boolean).join('; ') || '-';
+    const akar5why = m.whys.filter(Boolean).pop() || '-';
+    const akar = akarFish !== '-' ? akarFish : akar5why;
+    return `<tr>
+      <td>${i+1}</td>
+      <td><strong>${m.judul}</strong></td>
+      <td style="max-width:200px;font-size:12px">${akar.slice(0,80)}${akar.length>80?'…':''}</td>
+      <td>${m.kat==='Kontrak & Pelaksanaan'?'Keterlambatan / denda':'Potensi klaim / rework'}</td>
+      <td>${m.d>=4?'Signifikan (>5% pagu)':'Minimal'}</td>
+      <td>${m.k>=4?'Tinggi (butuh koordinasi APIP)':'Terkendali'}</td>
+      <td><span class="risk-pill ${rl.c}">${rl.l}</span></td>
+    </tr>`;
+  }).join('');
+}
+
+// ── TAMBAH MITIGASI ──────────────────────────────────────────
+function tambahMitigasi(){
+  const mid    = +document.getElementById('mit-masalah').value;
+  const strat  = document.getElementById('mit-strategi').value;
+  const aksi   = document.getElementById('mit-aksi').value.trim();
+  const pj     = document.getElementById('mit-pj').value.trim();
+  const dl     = document.getElementById('mit-deadline').value;
+  const sdm    = document.getElementById('mit-sdm').value.trim();
+  if(!mid || !strat || !aksi){ toast('Lengkapi field wajib!','#c0392b'); return; }
+  const m = masalahList.find(x=>x.id===mid);
+  mitigasiList.push({
+    masalahId: mid, masalahJudul: m?.judul||'?',
+    strategi: strat, aksi, pj, deadline: dl, sdm,
+    status: 'Belum Dimulai', persen: 0
+  });
+  save();
+  ['mit-aksi','mit-pj','mit-sdm'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('mit-masalah').value='';
+  document.getElementById('mit-strategi').value='';
+  addLog(`Rencana mitigasi ditambahkan untuk: "${m?.judul}"`);
+  toast('Mitigasi berhasil disimpan!','#27ae60');
+  refreshAll();
+}
+
+// ── RENDER TABLE MITIGASI ────────────────────────────────────
+function renderMitigasi(){
+  const tb = document.getElementById('tbody-mitigasi');
+  if(!mitigasiList.length){
+    tb.innerHTML='<tr><td colspan="8" style="text-align:center;color:var(--muted);padding:24px">Belum ada rencana mitigasi.</td></tr>';
+    return;
+  }
+  tb.innerHTML = mitigasiList.map((m,i)=>`
+    <tr>
+      <td>${i+1}</td>
+      <td style="font-size:12px">${m.masalahJudul}</td>
+      <td><span class="badge badge-blue" style="font-size:10px">${m.strategi.split(' ')[0]}</span></td>
+      <td style="font-size:12px;max-width:200px">${m.aksi.slice(0,60)}${m.aksi.length>60?'…':''}</td>
+      <td>${m.pj||'-'}</td>
+      <td>${m.deadline||'-'}</td>
+      <td>${mitStatusBadge(m.status)}</td>
+      <td>
+        <button class="btn btn-danger btn-sm" onclick="hapusMitigasi(${i})">🗑</button>
+      </td>
+    </tr>
+  `).join('');
+}
+
+function hapusMitigasi(i){
+  if(!confirm('Hapus rencana mitigasi ini?')) return;
+  const m = mitigasiList.splice(i,1)[0];
+  save();
+  addLog(`Mitigasi dihapus untuk: "${m.masalahJudul}"`);
+  toast('Mitigasi dihapus.','#e67e22');
+  refreshAll();
+}
+
+// ── REVIEW JADWAL ────────────────────────────────────────────
+function tambahReview(){
+  const judul   = document.getElementById('rev-judul').value.trim();
+  const tgl     = document.getElementById('rev-tgl').value;
+  const peserta = document.getElementById('rev-peserta').value.trim();
+  if(!judul || !tgl){ toast('Judul dan tanggal wajib diisi!','#c0392b'); return; }
+  reviewList.push({ judul, tgl, peserta, done: false });
+  save();
+  document.getElementById('rev-judul').value='';
+  document.getElementById('rev-tgl').value='';
+  document.getElementById('rev-peserta').value='';
+  addLog(`Jadwal review ditambahkan: "${judul}" pada ${tgl}`);
+  toast('Jadwal ditambahkan!','#27ae60');
+  renderReview();
+}
+
+function renderReview(){
+  const el = document.getElementById('jadwal-list');
+  if(!reviewList.length){ el.innerHTML='<div style="color:var(--muted);font-size:12px">Belum ada jadwal.</div>'; return; }
+  const today = new Date().toISOString().split('T')[0];
+  el.innerHTML = reviewList.map((r,i)=>{
+    const past = r.tgl < today;
+    return `<div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--border);font-size:12px">
+      <input type="checkbox" ${r.done?'checked':''} onchange="toggleReview(${i})"/>
+      <div style="flex:1">
+        <div style="font-weight:700;${r.done?'text-decoration:line-through;color:var(--muted)':''}">${r.judul}</div>
+        <div style="color:var(--muted)">${r.tgl} ${r.peserta?'| '+r.peserta:''}</div>
+      </div>
+      ${past && !r.done ? '<span class="badge badge-red">Terlambat</span>' : ''}
+      ${r.done ? '<span class="badge badge-green">Selesai</span>' : ''}
+      <button class="btn btn-danger btn-sm" onclick="hapusReview(${i})">🗑</button>
+    </div>`;
+  }).join('');
+}
+
+function toggleReview(i){
+  reviewList[i].done = !reviewList[i].done;
+  save(); renderReview();
+}
+function hapusReview(i){
+  reviewList.splice(i,1); save(); renderReview();
+}
+
+// ── UPDATE STATUS ────────────────────────────────────────────
+function updateStatusMasalah(){
+  const id  = +document.getElementById('upd-masalah').value;
+  const st  = document.getElementById('upd-status-masalah').value;
+  const cat = document.getElementById('upd-catatan-m').value.trim();
+  const m   = masalahList.find(x=>x.id===id);
+  if(!m){ toast('Pilih masalah terlebih dahulu!','#c0392b'); return; }
+  m.status  = st;
+  if(cat) m.catatan = cat;
+  save();
+  addLog(`Status masalah "${m.judul}" → ${st}`);
+  toast('Status diperbarui!','#27ae60');
+  refreshAll();
+}
+
+function updateStatusMitigasi(){
+  const i  = document.getElementById('upd-mitigasi').value;
+  if(i===''){ toast('Pilih mitigasi terlebih dahulu!','#c0392b'); return; }
+  const st = document.getElementById('upd-status-mitigasi').value;
+  const p  = +document.getElementById('upd-persen').value;
+  mitigasiList[i].status = st;
+  mitigasiList[i].persen = p;
+  save();
+  addLog(`Status mitigasi #${+i+1} → ${st} (${p}%)`);
+  toast('Status mitigasi diperbarui!','#27ae60');
+  refreshAll();
+}
+
+// ── PROGRESS AREA ────────────────────────────────────────────
+function renderProgress(){
+  const el = document.getElementById('progress-area');
+  if(!masalahList.length){
+    el.innerHTML='<div style="color:var(--muted);font-size:13px">Belum ada data.</div>'; return;
+  }
+  const total = masalahList.length;
+  const selesai = masalahList.filter(m=>m.status==='Terselesaikan'||m.status==='Ditutup (Accepted)').length;
+  const prosen = total ? Math.round(selesai/total*100) : 0;
+  el.innerHTML = `
+    <div style="margin-bottom:16px">
+      <div style="display:flex;justify-content:space-between;font-size:13px;font-weight:700;margin-bottom:6px">
+        <span>Penyelesaian Masalah</span><span>${prosen}% (${selesai}/${total})</span>
+      </div>
+      <div class="progress-bar"><div class="progress-fill" style="width:${prosen}%;background:${prosen>=80?'var(--success)':prosen>=40?'var(--warning)':'var(--danger)'}"></div></div>
+    </div>
+    ${masalahList.map(m=>{
+      const mitCount = mitigasiList.filter(x=>x.masalahId===m.id).length;
+      const mitDone  = mitigasiList.filter(x=>x.masalahId===m.id && x.status==='Selesai').length;
+      const p2 = mitCount ? Math.round(mitDone/mitCount*100) : 0;
+      const r  = riskLabel(m.skor);
+      return `<div style="margin-bottom:12px;padding:10px;border:1px solid var(--border);border-radius:8px">
+        <div style="display:flex;justify-content:space-between;font-size:12px;font-weight:700">
+          <span>${m.judul}</span>
+          <span class="risk-pill ${r.c}" style="font-size:10px">${r.l}</span>
+        </div>
+        <div style="font-size:11px;color:var(--muted);margin:4px 0">${statusBadge(m.status)} | Mitigasi: ${mitDone}/${mitCount}</div>
+        <div class="progress-bar"><div class="progress-fill" style="width:${p2}%;background:var(--secondary)"></div></div>
+        <div style="font-size:10px;color:var(--muted);margin-top:3px">Kemajuan mitigasi: ${p2}%</div>
+      </div>`;
+    }).join('')}
+  `;
+}
+
+// ── KPI & BERANDA ────────────────────────────────────────────
+function refreshKPI(){
+  const total    = masalahList.length;
+  const open     = masalahList.filter(m=>m.status==='Terbuka'||m.status==='Sedang Diproses').length;
+  const solved   = masalahList.filter(m=>m.status==='Terselesaikan'||m.status==='Ditutup (Accepted)').length;
+  const mit      = mitigasiList.filter(m=>m.status!=='Selesai'&&m.status!=='Dibatalkan').length;
+  const critical = masalahList.filter(m=>m.skor>=20).length;
+
+  document.getElementById('kpi-total').textContent    = total;
+  document.getElementById('kpi-open').textContent     = open;
+  document.getElementById('kpi-solved').textContent   = solved;
+  document.getElementById('kpi-mit').textContent      = mit;
+  document.getElementById('kpi-critical').textContent = critical;
+  document.getElementById('badge-id').textContent     = open;
+  document.getElementById('badge-mit').textContent    = mit;
+
+  // alerts
+  const ab = document.getElementById('alerts-box');
+  const alerts = [];
+  if(critical>0) alerts.push(`<div class="alert alert-danger"><span class="alert-icon">🚨</span><strong>${critical} masalah KRITIS</strong> membutuhkan tindakan segera dari PPK.</div>`);
+  const overdue = mitigasiList.filter(m=>{
+    const today = new Date().toISOString().split('T')[0];
+    return m.deadline && m.deadline < today && m.status!=='Selesai' && m.status!=='Dibatalkan';
+  }).length;
+  if(overdue>0) alerts.push(`<div class="alert alert-warning"><span class="alert-icon">⏰</span><strong>${overdue} rencana mitigasi</strong> telah melewati deadline tanpa penyelesaian.</div>`);
+  if(!total) alerts.push(`<div class="alert alert-info"><span class="alert-icon">💡</span> Mulai dengan menambahkan masalah pada tab <strong>Identifikasi Masalah</strong>.</div>`);
+  ab.innerHTML = alerts.join('');
+}
+
+function refreshDonut(){
+  const counts = {critical:0,high:0,medium:0,low:0};
+  masalahList.forEach(m=>{
+    const r = riskLabel(m.skor);
+    if(r.l==='Kritis') counts.critical++;
+    else if(r.l==='Tinggi') counts.high++;
+    else if(r.l==='Sedang') counts.medium++;
+    else counts.low++;
+  });
+  const total = masalahList.length || 1;
+  const colors = ['#ef4444','#f97316','#eab308','#22c55e'];
+  const vals   = [counts.critical, counts.high, counts.medium, counts.low];
+  const labels = ['Kritis','Tinggi','Sedang','Rendah'];
+  const circ   = 100;
+  let offset   = 25; // start top
+  const segs   = [];
+  vals.forEach((v,i)=>{
+    const pct = v/total*circ;
+    if(pct>0) segs.push({color:colors[i], pct, offset, label:labels[i], count:v});
+    offset += pct;
+    if(offset>circ) offset -= circ;
+  });
+  const svgEl = document.getElementById('donut-svg');
+  const existSegs = svgEl.querySelectorAll('.donut-seg');
+  existSegs.forEach(s=>s.remove());
+  segs.forEach(s=>{
+    const el = document.createElementNS('http://www.w3.org/2000/svg','circle');
+    el.setAttribute('cx','21'); el.setAttribute('cy','21'); el.setAttribute('r','15.915');
+    el.setAttribute('fill','none'); el.setAttribute('stroke',s.color);
+    el.setAttribute('stroke-width','7');
+    el.setAttribute('stroke-dasharray',`${s.pct} ${circ-s.pct}`);
+    el.setAttribute('stroke-dashoffset',`${circ-s.offset+25}`);
+    el.classList.add('donut-seg');
+    svgEl.appendChild(el);
+  });
+  const dc = document.getElementById('donut-counts');
+  dc.innerHTML = labels.map((l,i)=>`${l}: <strong>${vals[i]}</strong>`).join(' | ');
+}
+
+function refreshBarChart(){
+  const cats = {};
+  masalahList.forEach(m=>{ cats[m.kat] = (cats[m.kat]||0)+1; });
+  const sorted = Object.entries(cats).sort((a,b)=>b[1]-a[1]).slice(0,6);
+  const el = document.getElementById('bar-chart');
+  if(!sorted.length){ el.innerHTML='<div style="color:var(--muted);font-size:13px">Belum ada data.</div>'; return; }
+  const max = sorted[0][1];
+  const colors = ['#1a3c5e','#2e7d9a','#27ae60','#e67e22','#c0392b','#8e44ad'];
+  el.innerHTML = sorted.map(([k,v],i)=>
+    `<div class="bar-row">
+      <div class="bar-label">${k}</div>
+      <div class="bar-track"><div class="bar-fill" style="width:${v/max*100}%;background:${colors[i]}">${v}</div></div>
+    </div>`
+  ).join('');
+}
+
+// ── EXPORT CSV ───────────────────────────────────────────────
+function exportCSV(){
+  if(!masalahList.length){ toast('Tidak ada data untuk diekspor.','#c0392b'); return; }
+  const headers = ['No','Judul','Kategori','Kemungkinan','Dampak','Skor','Level Risiko','Status','Pihak','Tanggal'];
+  const rows    = masalahList.map((m,i)=>[
+    i+1, m.judul, m.kat, m.k, m.d, m.skor, riskLabel(m.skor).l, m.status, m.pihak, m.tgl
+  ].map(v=>`"${String(v).replace(/"/g,'""')}"`));
+  const csv = [headers, ...rows].map(r=>r.join(',')).join('\n');
+  const blob = new Blob(['﻿'+csv], {type:'text/csv;charset=utf-8'});
+  const url  = URL.createObjectURL(blob);
+  const a    = document.createElement('a');
+  a.href=url; a.download='PPK_Masalah_'+new Date().toISOString().split('T')[0]+'.csv';
+  a.click(); URL.revokeObjectURL(url);
+  toast('CSV berhasil diunduh!','#27ae60');
+}
+
+// ── ACCORDION ────────────────────────────────────────────────
+function toggleAccord(head){
+  const body = head.nextElementSibling;
+  body.classList.toggle('open');
+  const arrow = head.querySelector('span:last-child');
+  if(arrow) arrow.textContent = body.classList.contains('open') ? '▴' : '▾';
+}
+
+// ── REFRESH ALL ──────────────────────────────────────────────
+function refreshAll(){
+  refreshKPI();
+  renderTable();
+  renderMitigasi();
+  refreshAnalisa();
+  refreshDonut();
+  refreshBarChart();
+  renderProgress();
+  renderReview();
+  renderLog();
+  populateSelects();
+}
+
+// ── INIT ─────────────────────────────────────────────────────
+document.getElementById('f-tanggal').value = new Date().toISOString().split('T')[0];
+refreshAll();
+</script>
+</body>
+</html>
